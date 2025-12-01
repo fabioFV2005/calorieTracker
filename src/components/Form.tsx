@@ -1,12 +1,13 @@
 import { useState } from "react";
 import {v4 as uuidv4} from 'uuid'
-import type { ChangeEvent, Dispatch, FormEvent } from "react";
+import { useEffect, type ChangeEvent, type Dispatch, type FormEvent} from "react";
 import type { Activity } from "../types";
 import categories from "../data/categories";
-import type { ActivityActions } from "../reducers/activityReducer";
+import type { ActivityActions, ActivityState } from "../reducers/activityReducer";
 
 type FormProps = {
-  dispatch: Dispatch<ActivityActions>
+  dispatch: Dispatch<ActivityActions>,
+  state:  ActivityState
 }
 const initialState : Activity={
     id: uuidv4(),
@@ -14,8 +15,19 @@ const initialState : Activity={
     name: '',
     calories: 0
   };
-export default function Form({dispatch}: FormProps) {
+export default function Form({dispatch, state}: FormProps) {
   const [activity, setActivity] = useState<Activity>(initialState);
+
+  useEffect(()=>{
+    if(state.activeId){
+      // filtramos el array de activities para encontrar la actividad que coincide con el activeId
+      // y luego tomamos el primer elemento del array resultante
+      // si no hay coincidencia, se devuelve undefined
+      const selectedActivity = state.activities.filter(stateActivity => stateActivity.id === state.activeId)[0]; 
+      setActivity(selectedActivity);
+    }
+  }, [state.activeId]);
+
   // podemos utilizar | para indicar que el parametro event puede ser de varios tipos
   const handleChange = (event: ChangeEvent<HTMLSelectElement>|ChangeEvent<HTMLInputElement>) =>{
     // esta linea es solo para verificar si el campo es numerico
